@@ -56,6 +56,23 @@ class OrientationVisualization:
       [pitch, roll, yaw] = data_serialized
       self.data = [pitch, roll, yaw]
 
+  def main(self):
+    pygame.init()
+    flags = OPENGL | DOUBLEBUF
+    screen = pygame.display.set_mode((1280, 720), flags)
+    pygame.display.set_caption("Orientation Visualization")
+    clock = pygame.time.Clock()
+    self.screen(1280, 720)
+    self.init()
+
+    while 1:
+      event = pygame.event.poll()
+      if event.type == QUIT or event.type == KEYDOWN: sys.exit(1)
+      self.display()
+      pygame.display.flip()
+      clock.tick(30)
+    if self.useSerial:
+      self.serial.close()
   def init(self):
     glShadeModel(GL_SMOOTH)
     glClearColor(0.0, 0.0, 0.0, 0.0)
