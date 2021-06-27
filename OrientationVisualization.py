@@ -87,6 +87,44 @@ class OrientationVisualization:
     gluPerspective(45, 1.0*width/height, 0.1, 100.0)
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
+
+  def read_data(self):
+    if(self.useSerial):
+      self.serial.reset_input_buffer()
+      self.data = json.loads(self.serial.readline().decode('UTF-8'))
+
+    if(self.useQuat):
+      w = float(self.data[0])
+      x = float(self.data[1])
+      y = float(self.data[2])
+      z = float(self.data[3])
+      return [w, x, y, z]
+    else:
+      yaw = float(self.data[0])
+      pitch = float(self.data[1])
+      roll = float(self.data[2])
+      return [yaw, pitch, roll]
+ 
+  def display(self):
+    # Clear the image
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    # Reset previous transforms
+    glLoadIdentity()
+    # Transform to perspective view
+    glTranslatef(0, 0.0, -7.0)
+    
+    # Draw
+    if self.useQuat:
+      [w, x, y, z] = self.read_data()
+      self.draw(w, x, y, z)
+    else:
+      [pitch, roll, yaw] = self.read_data()
+      self.draw(1, pitch, roll, yaw)
+
+    self.draw_axes()
+
+    # Flush and swap
+    glFlush()
   def draw(self, w, x, y, z):
     glBegin(GL_QUADS)
 
