@@ -102,3 +102,13 @@ class OrientationVisualization:
     glVertex3fv(self.verticeH)
 
     glEnd()
+
+  def draw_text(self, position, text, size):
+    font = pygame.font.SysFont("Courier", size, True)
+    textSurface = font.render(text, True, 
+    (255, 255, 255, 255), (0, 0, 0, 255))
+    textData = pygame.image.tostring(textSurface, "RGBA", True)
+    glRasterPos3d(*position)
+    glDrawPixels(textSurface.get_width(), textSurface.get_height(), 
+      GL_RGBA, GL_UNSIGNED_BYTE, textData
+    )
