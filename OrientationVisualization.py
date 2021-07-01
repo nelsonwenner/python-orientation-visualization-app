@@ -10,6 +10,20 @@ import sys
 
 class OrientationVisualization:
 
+  HOST = '0.0.0.0'
+  PORT = 8080
+
+  data = [0.0, 0.0, 0.0, 0.0]
+
+  verticeA = [1.0, 0.2, 1.0]
+  verticeB = [-1.0, 0.2, 1.0]
+  verticeC = [-1.0, -0.2, 1.0]
+  verticeD = [1.0, -0.2, 1.0]
+  verticeE = [1.0, 0.2, -1.0]
+  verticeF = [-1.0, 0.2, -1.0]
+  verticeG = [-1.0, -0.2, -1.0]
+  verticeH = [1.0, -0.2, -1.0]
+
   def __init__(self, useSerial, useQuat):
     self.useSerial = useSerial
     self.useQuat = useQuat
@@ -41,3 +55,50 @@ class OrientationVisualization:
     else:
       [pitch, roll, yaw] = data_serialized
       self.data = [pitch, roll, yaw]
+
+  def draw(self, w, x, y, z):
+    glBegin(GL_QUADS)
+
+    # FRONT: ABCD - GREEN
+    glColor3f(0.0, 1.0, 0.0)
+    glVertex3fv(self.verticeA)
+    glVertex3fv(self.verticeB)
+    glVertex3fv(self.verticeC)
+    glVertex3fv(self.verticeD)
+
+    # BACK: FEHG - GREEN
+    glColor3f(0.0, 1.0, 0.0)
+    glVertex3fv(self.verticeF)
+    glVertex3fv(self.verticeE)
+    glVertex3fv(self.verticeH)
+    glVertex3fv(self.verticeG)
+
+    # RIGHT: EADH - RED
+    glColor3f(1.0, 0.0, 0.0)
+    glVertex3fv(self.verticeE)
+    glVertex3fv(self.verticeA)
+    glVertex3fv(self.verticeD)
+    glVertex3fv(self.verticeH)
+
+    # LEFT: BFGC - RED
+    glColor3f(1.0, 0.0, 0.0)
+    glVertex3fv(self.verticeB)
+    glVertex3fv(self.verticeF)
+    glVertex3fv(self.verticeG)
+    glVertex3fv(self.verticeC)
+
+    # TOP: EFBA - BLUE
+    glColor3f(0.0, 0.0, 1.0)
+    glVertex3fv(self.verticeE)
+    glVertex3fv(self.verticeF)
+    glVertex3fv(self.verticeB)
+    glVertex3fv(self.verticeA)
+
+    # BOTTOM: DCGH - BLUE
+    glColor3f(0.0, 0.0, 1.0)
+    glVertex3fv(self.verticeD)
+    glVertex3fv(self.verticeC)
+    glVertex3fv(self.verticeG)
+    glVertex3fv(self.verticeH)
+
+    glEnd()
