@@ -10,6 +10,15 @@ import sys
 
 class OrientationVisualization:
 
+  def thread_socket_server(self):
+    server = WebsocketServer(self.PORT, self.HOST)
+    server.set_fn_new_client(self.new_client)
+    server.set_fn_client_left(self.client_left)
+    server.set_fn_message_received(self.message_received)
+    threadSocketServer = Thread(target=server.run_forever, daemon=True)
+    threadSocketServer.start()
+    print('[x] Running Thread WebSocket: ', threadSocketServer.getName())
+    print('[x] Server started with successfully!')
   def new_client(self, client, server):
     print("[x] New client connected and was given id %d" % client['id'])
     server.send_message_to_all("Hey all, a new client has joined us")
