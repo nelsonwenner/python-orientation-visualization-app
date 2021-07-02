@@ -103,6 +103,25 @@ class OrientationVisualization:
 
     glEnd()
 
+  def draw_axes(self, len = 2.0):
+    glColor3f(1.0, 1.0, 1.0)
+    glLineWidth(4.0)
+
+    glBegin(GL_LINE_LOOP)
+    glVertex3d(0, 0, 0)
+    glVertex3d(len, 0, 0)
+    glVertex3d(0, 0, 0)
+    glVertex3d(0, len, 0)
+    glVertex3d(0, 0, 0)
+    glVertex3d(0, 0, len)
+    glEnd()
+
+    glVertex3d(len, 0, 0)
+    self.draw_text((len, 0, 0), "X", 20)
+    glVertex3d(0, len, 0)
+    self.draw_text((0, len, 0), "Y", 20)
+    glVertex3d(0, 0, len)
+    self.draw_text((0, 0, len), "Z", 20)
   def draw_text(self, position, text, size):
     font = pygame.font.SysFont("Courier", size, True)
     textSurface = font.render(text, True, 
