@@ -56,6 +56,13 @@ class OrientationVisualization:
       [pitch, roll, yaw] = data_serialized
       self.data = [pitch, roll, yaw]
 
+  def init(self):
+    glShadeModel(GL_SMOOTH)
+    glClearColor(0.0, 0.0, 0.0, 0.0)
+    glClearDepth(1.0)
+    glEnable(GL_DEPTH_TEST)
+    glDepthFunc(GL_LEQUAL)
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
   def screen(self, width, height):
     glViewport(0, 0, width, height)
     glMatrixMode(GL_PROJECTION)
