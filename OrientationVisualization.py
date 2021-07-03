@@ -10,6 +10,14 @@ import sys
 
 class OrientationVisualization:
 
+  def __init__(self, useSerial, useQuat):
+    self.useSerial = useSerial
+    self.useQuat = useQuat
+    if self.useSerial:
+      import serial
+      self.serial = serial.Serial('/dev/ttyUSB0', 38400)
+    else:
+      self.thread_socket_server()
   def thread_socket_server(self):
     server = WebsocketServer(self.PORT, self.HOST)
     server.set_fn_new_client(self.new_client)
