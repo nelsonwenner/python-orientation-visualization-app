@@ -56,6 +56,13 @@ class OrientationVisualization:
       [pitch, roll, yaw] = data_serialized
       self.data = [pitch, roll, yaw]
 
+  def screen(self, width, height):
+    glViewport(0, 0, width, height)
+    glMatrixMode(GL_PROJECTION)
+    glLoadIdentity()
+    gluPerspective(45, 1.0*width/height, 0.1, 100.0)
+    glMatrixMode(GL_MODELVIEW)
+    glLoadIdentity()
   def draw(self, w, x, y, z):
     glBegin(GL_QUADS)
 
