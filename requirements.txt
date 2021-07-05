@@ -1,0 +1,5 @@
+opengles==0.0.1
+pygame==2.0.1
+PyOpenGL==3.1.5
+pyserial==3.5
+websocket-server==0.4
