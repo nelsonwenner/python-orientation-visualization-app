@@ -32,6 +32,7 @@ class OrientationVisualization:
       self.serial = serial.Serial('/dev/ttyUSB0', 38400)
     else:
       self.thread_socket_server()
+
   def thread_socket_server(self):
     server = WebsocketServer(self.PORT, self.HOST)
     server.set_fn_new_client(self.new_client)
@@ -41,9 +42,11 @@ class OrientationVisualization:
     threadSocketServer.start()
     print('[x] Running Thread WebSocket: ', threadSocketServer.getName())
     print('[x] Server started with successfully!')
+
   def new_client(self, client, server):
     print("[x] New client connected and was given id %d" % client['id'])
     server.send_message_to_all("Hey all, a new client has joined us")
+
   def client_left(self, client, server):
     print("[x] Client(%d) disconnected" % client['id'])
 
@@ -55,7 +58,7 @@ class OrientationVisualization:
     else:
       [pitch, roll, yaw] = data_serialized
       self.data = [pitch, roll, yaw]
-
+  
   def main(self):
     pygame.init()
     flags = OPENGL | DOUBLEBUF
@@ -73,6 +76,7 @@ class OrientationVisualization:
       clock.tick(30)
     if self.useSerial:
       self.serial.close()
+
   def init(self):
     glShadeModel(GL_SMOOTH)
     glClearColor(0.0, 0.0, 0.0, 0.0)
@@ -80,6 +84,7 @@ class OrientationVisualization:
     glEnable(GL_DEPTH_TEST)
     glDepthFunc(GL_LEQUAL)
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
+
   def screen(self, width, height):
     glViewport(0, 0, width, height)
     glMatrixMode(GL_PROJECTION)
@@ -125,7 +130,25 @@ class OrientationVisualization:
 
     # Flush and swap
     glFlush()
+    
   def draw(self, w, x, y, z):
+    self.draw_text((-2.6, 1.8, 2), "Press Escape to exit.", 20)
+
+    if self.useQuat:
+      info = "Quaternion w: %.4f, x: %.4f, y: %.4f z: %.4f" %(w, x, y, z)
+      self.draw_text((-2.6, -1.8, 2), info, 20)
+      # W and the angle of rotation around the axis of the quaternion.
+      # Specifies the angle of rotation, in degrees.
+      angle = 2 * math.acos(w) * 180.00 / math.pi 
+      glRotatef(angle, x, z, y)
+    else:
+      yaw, pitch, roll = x, y, z
+      info = "Angle Euler Pitch: %f, Roll: %f, Yaw: %f" %(pitch, roll, yaw)
+      self.draw_text((-2.6, -1.8, 2), info, 20)
+      glRotatef(-roll, 0.00, 0.00, 1.00)
+      glRotatef(pitch, 1.00, 0.00, 0.00)
+      glRotatef(yaw, 0.00, 1.00, 0.00)
+
     glBegin(GL_QUADS)
 
     # FRONT: ABCD - GREEN
@@ -191,6 +214,7 @@ class OrientationVisualization:
     self.draw_text((0, len, 0), "Y", 20)
     glVertex3d(0, 0, len)
     self.draw_text((0, 0, len), "Z", 20)
+
   def draw_text(self, position, text, size):
     font = pygame.font.SysFont("Courier", size, True)
     textSurface = font.render(text, True, 
@@ -200,3 +224,9 @@ class OrientationVisualization:
     glDrawPixels(textSurface.get_width(), textSurface.get_height(), 
       GL_RGBA, GL_UNSIGNED_BYTE, textData
     )
+
+if __name__ == '__main__':
+  useSerial = int(input('\nMeans of data transmission, type [1] to use serial port and [0] to use via wifi: '))
+  useQuat = int(input('Type of transmitted data type [1] for quaternions and [0] for Euler angles: '))   
+  orientationVisualization = OrientationVisualization(useSerial, useQuat)
+  orientationVisualization.main()
