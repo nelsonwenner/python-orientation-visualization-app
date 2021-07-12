@@ -3,6 +3,7 @@ from OpenGL.GLU import *
 from OpenGL.GL import * 
 import pygame
 import math
+
 class OrientationVisualization:
 
   verticeA = [1.0, 0.2, 1.0]
