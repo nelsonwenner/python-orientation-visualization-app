@@ -15,46 +15,42 @@ The module that allows observing orientations through a 3D object from Euler ang
 
 * [Python3](https://www.python.org/)
 * [OpenGL](https://pypi.org/project/PyOpenGL/)
+* [Pysimplegui](https://pysimplegui.readthedocs.io/en/latest/)
 
 ## :raised_hand: Warning
-To use this module, remember that data must be transmitted via serial port or wifi in string in the following format:
+To use this module, remember that data must be transmitted via serial port or WIFI in string where each data has to be separated by a comma.
 * Quaternion
   ```json
-  "
-    [
-      w,
-      x,
-      y,
-      z
-    ]
-  "
+  "w,x,y,z"
   ``` 
+  * Data example
+    ```json
+    "00.0000000,00.0000000,00.0000000,00.0000000"
+    ``` 
 
 * Euler angles
   ```json
-  "
-    [
-      pitch,
-      roll,
-      yaw
-    ]
-  "
+  "pitch,roll,yaw"
   ``` 
+  * Data example
+    ```json
+    "00.0000000,00.0000000,00.0000000"
+    ``` 
 
 ## :information_source: Getting Started
 
 1. Fork this repository and clone it on your machine.
-2. Change the directory to `orientation-visualization` where you cloned it.
+2. Change the directory to `python-orientation visualization-app` where you cloned it.
 
 ## :zap: Module Getting Started
 
 1. Install requirements.
 ```shell
-$ pip install -r requirements.txt
+$ pi3 install -r requirements.txt
 ```
 2. Startup
 ```shell
-$ python3 OrientationVisualization.py
+$ python3 App.py
 ```
 * If you are going to use data transmission via Wifi, when connecting, keep in mind that the WebSocket server `IP` will be your machine's `IP` and port `8080`.
 ---
