@@ -1,19 +1,9 @@
-from websocket_server import WebsocketServer
-from threading import Thread
 from pygame.locals import *
 from OpenGL.GLU import *
-from OpenGL.GL import *
+from OpenGL.GL import * 
 import pygame
-import json
 import math
-import sys
-
 class OrientationVisualization:
-
-  HOST = '0.0.0.0'
-  PORT = 8080
-
-  data = [0.0, 0.0, 0.0, 0.0]
 
   verticeA = [1.0, 0.2, 1.0]
   verticeB = [-1.0, 0.2, 1.0]
@@ -24,42 +14,7 @@ class OrientationVisualization:
   verticeG = [-1.0, -0.2, -1.0]
   verticeH = [1.0, -0.2, -1.0]
 
-  def __init__(self, useSerial, useQuat):
-    self.useSerial = useSerial
-    self.useQuat = useQuat
-    if self.useSerial:
-      import serial
-      self.serial = serial.Serial('/dev/ttyUSB0', 38400)
-    else:
-      self.thread_socket_server()
-
-  def thread_socket_server(self):
-    server = WebsocketServer(self.PORT, self.HOST)
-    server.set_fn_new_client(self.new_client)
-    server.set_fn_client_left(self.client_left)
-    server.set_fn_message_received(self.message_received)
-    threadSocketServer = Thread(target=server.run_forever, daemon=True)
-    threadSocketServer.start()
-    print('[x] Running Thread WebSocket: ', threadSocketServer.getName())
-    print('[x] Server started with successfully!')
-
-  def new_client(self, client, server):
-    print("[x] New client connected and was given id %d" % client['id'])
-    server.send_message_to_all("Hey all, a new client has joined us")
-
-  def client_left(self, client, server):
-    print("[x] Client(%d) disconnected" % client['id'])
-
-  def message_received(self, client, server, message):
-    data_serialized = json.loads(message)
-    if self.useQuat:
-      [w, x, y, z] = data_serialized
-      self.data = [w, x, y, z]
-    else:
-      [pitch, roll, yaw] = data_serialized
-      self.data = [pitch, roll, yaw]
-  
-  def main(self):
+  def start(self, device, app):
     pygame.init()
     flags = OPENGL | DOUBLEBUF
     screen = pygame.display.set_mode((1280, 720), flags)
@@ -68,14 +23,13 @@ class OrientationVisualization:
     self.screen(1280, 720)
     self.init()
 
-    while 1:
-      event = pygame.event.poll()
-      if event.type == QUIT or event.type == KEYDOWN: sys.exit(1)
-      self.display()
+    while True:
+      if app.stop_thread_trigger: break
+      data = device.get_data()
+      self.display(data, app.current_type_data)
       pygame.display.flip()
-      clock.tick(30)
-    if self.useSerial:
-      self.serial.close()
+      clock.tick(50)
+    pygame.quit()
 
   def init(self):
     glShadeModel(GL_SMOOTH)
@@ -92,56 +46,44 @@ class OrientationVisualization:
     gluPerspective(45, 1.0*width/height, 0.1, 100.0)
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
-
-  def read_data(self):
-    if(self.useSerial):
-      self.serial.reset_input_buffer()
-      self.data = json.loads(self.serial.readline().decode('UTF-8'))
-
-    if(self.useQuat):
-      w = float(self.data[0])
-      x = float(self.data[1])
-      y = float(self.data[2])
-      z = float(self.data[3])
-      return [w, x, y, z]
-    else:
-      yaw = float(self.data[0])
-      pitch = float(self.data[1])
-      roll = float(self.data[2])
-      return [yaw, pitch, roll]
  
-  def display(self):
+  def display(self, data, current_type_data):
     # Clear the image
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     # Reset previous transforms
     glLoadIdentity()
     # Transform to perspective view
     glTranslatef(0, 0.0, -7.0)
-    
+
     # Draw
-    if self.useQuat:
-      [w, x, y, z] = self.read_data()
-      self.draw(w, x, y, z)
-    else:
-      [pitch, roll, yaw] = self.read_data()
-      self.draw(1, pitch, roll, yaw)
+    if current_type_data == '_QUATERNION_':
+      w = float(data[0])
+      x = float(data[1])
+      y = float(data[2])
+      z = float(data[3])
+      self.draw(w, x, y, z, current_type_data)
+    elif current_type_data == '_EULERANGLE_':
+      yaw = float(data[0])
+      pitch = float(data[1])
+      roll = float(data[2])
+      self.draw(1, pitch, roll, yaw, current_type_data)
 
     self.draw_axes()
 
     # Flush and swap
     glFlush()
     
-  def draw(self, w, x, y, z):
-    self.draw_text((-2.6, 1.8, 2), "Press Escape to exit.", 20)
-
-    if self.useQuat:
+  def draw(self, w, x, y, z, current_type_data):
+  
+    if current_type_data == '_QUATERNION_':
       info = "Quaternion w: %.4f, x: %.4f, y: %.4f z: %.4f" %(w, x, y, z)
       self.draw_text((-2.6, -1.8, 2), info, 20)
       # W and the angle of rotation around the axis of the quaternion.
       # Specifies the angle of rotation, in degrees.
       angle = 2 * math.acos(w) * 180.00 / math.pi 
       glRotatef(angle, x, z, y)
-    else:
+
+    elif current_type_data == '_EULERANGLE_':
       yaw, pitch, roll = x, y, z
       info = "Angle Euler Pitch: %f, Roll: %f, Yaw: %f" %(pitch, roll, yaw)
       self.draw_text((-2.6, -1.8, 2), info, 20)
@@ -224,9 +166,3 @@ class OrientationVisualization:
     glDrawPixels(textSurface.get_width(), textSurface.get_height(), 
       GL_RGBA, GL_UNSIGNED_BYTE, textData
     )
-
-if __name__ == '__main__':
-  useSerial = int(input('\nMeans of data transmission, type [1] to use serial port and [0] to use via wifi: '))
-  useQuat = int(input('Type of transmitted data type [1] for quaternions and [0] for Euler angles: '))   
-  orientationVisualization = OrientationVisualization(useSerial, useQuat)
-  orientationVisualization.main()
