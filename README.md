@@ -40,7 +40,7 @@ To use this module, remember that data must be transmitted via serial port or WI
 ## :information_source: Getting Started
 
 1. Fork this repository and clone it on your machine.
-2. Change the directory to `python-orientation visualization-app` where you cloned it.
+2. Change the directory to `python-orientation-visualization-app` where you cloned it.
 
 ## :zap: Module Getting Started
 
